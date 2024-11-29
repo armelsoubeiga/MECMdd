@@ -92,17 +92,36 @@ mecmdd.rwl<-function(Xlist, c, type='full', alpha=1, beta=1.5, delta=9, epsi=1e-
     
     
     # weight
-    for(j in 1:(nF-1)){
-      for(l in 1:pmatrix){
-        num <- sum(sapply(seq(n), function(i) 
-          s * (card[j]^alpha) * m[i,j]^beta * Xlist[[l]][i,prototype[j]]))^(-1/(s-1))
-
-        den <- sum(sapply(seq_along(Xlist), function(h)
-          sum(sapply(seq(n), function(i) 
-            s * (card[j]^alpha) * m[i,j]^beta * Xlist[[h]][i,prototype[j]]))^(-1/(s-1))))
-        lambda[j,l] <- num/den
+    if(weight=='sum'){
+      for(j in 1:(nF-1)){
+        for(l in 1:pmatrix){
+          num <- sum(sapply(seq(n), function(i) 
+            s * (card[j]^alpha) * m[i,j]^beta * Xlist[[l]][i,prototype[j]]))^(-1/(s-1))
+          
+          den <- sum(sapply(seq_along(Xlist), function(h)
+            sum(sapply(seq(n), function(i) 
+              s * (card[j]^alpha) * m[i,j]^beta * Xlist[[h]][i,prototype[j]]))^(-1/(s-1))))
+          
+          lambda[j,l] <- num/den
+        }
       }
     }
+
+    if(weight=='prod'){
+      for(j in 1:(nF-1)){
+        for(l in 1:pmatrix){
+          num <- prod(sapply(seq_along(Xlist), function(h)
+            sum(sapply(seq(n), function(i) 
+                (card[j]^alpha) * m[i,j]^beta * Xlist[[h]][i,prototype[j]]))^(1/pmatrix)),na.rm = TRUE)
+          
+          den <- sum(sapply(seq(n), function(i) 
+                  (card[j]^alpha) * m[i,j]^beta * Xlist[[l]][i,prototype[j]]))
+          
+          lambda[j,l] <- num/den
+        }
+      }
+    }
+    
     
     # medoids
     V <- matrix(0,n,nF-1)
